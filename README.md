@@ -1,9 +1,14 @@
-### An example SBT project which uses macros (Scala 2.10/2.11, SBT 0.13)
+# lazifed
 
-*In order to enable quasiquotes in Scala 2.10.x, use the macro paradise compiler plugin as outlined in  [https://github.com/scalamacros/sbt-example-paradise](https://github.com/scalamacros/sbt-example-paradise)*.
+A scala macro for reasonable lazy semantics.
 
-To verify that everything works fine, do `sbt run`.
+This library provides three annotation macros:
 
-Note that currently SBT doesn't support recompilation of macro clients if the dependencies of the macro implementation have changed - macro clients are only recompiled when the macro definition itself is:  https://github.com/sbt/sbt/issues/399.
+`@lazify`: Rewrites a `def` or `val` so that the right-hand-side is memoized. Does not synchronize or attempt to share the memo between threads.
 
-Huge thanks to Paul Butcher (https://github.com/paulbutcher/ScalaMock/blob/typemacros/project/Build.scala) and Adam Warski (https://github.com/adamw/scala-macro-debug) whose SBT projects I used as prototypes for this one.
+`@lazifyOptimistic`: Rewrites a `def` or `val` to something semantically equivalent to a `lazy val`, synchronizing on the parent object to share the memo among multiple threads. Performs best if the expected contention is low.
+
+`@lazifyPessimistic`: Rewrites a `def` or `val` to an atomic reference that uses _compare-and-set_ to share the memo among multiple threads. Performs better than the optimistic version when contention is high, at the cost of doing more work than necessary when contention is low.
+
+Requires the [macro paradise compiler plugin](http://docs.scala-lang.org/overviews/macros/paradise.html).
+
