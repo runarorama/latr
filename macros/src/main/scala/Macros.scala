@@ -56,26 +56,28 @@ object lazifyPessimisticMacro {
       val haz = TermName(c.freshName(s"${tn}_haz$$"))
       val memo = TermName(c.freshName(s"${tn}_memo$$"))
       val lazyCompute = TermName(c.freshName(s"${tn}_lazyCompute$$"))
+      val monitor = TermName(c.freshName(s"${tn}_monitor$$"))
 
       q"""
+        val $monitor = new Object {}
         @volatile var $haz: Int = 0
         var $memo: $tpt = _
         private def $lazyCompute(): $tpt = {
-          this.synchronized {
+          $monitor.synchronized {
             if ($haz == 0) {
               $haz = 1
             } else {
               while ($haz == 1) {
-                this.wait()
+                $monitor.wait()
               }
               return $memo
             }
           }
           val result = $expr
-          this.synchronized {
+          $monitor.synchronized {
             $memo = result
             $haz = 3
-            this.notifyAll()
+            $monitor.notifyAll()
           }
           $memo
         }
@@ -120,20 +122,20 @@ object lazifyOptimisticMacro {
             if ($haz.compareAndSet(0, 1)) {
               val result = $expr
               $memo = result
-              if ($haz.getAndSet(3) != 1) synchronized { notify() }
+              if ($haz.getAndSet(3) != 1) $haz.synchronized { $haz.notify() }
               result
             } else $tname
           case 1 =>
             $haz.compareAndSet(1, 2)
-            synchronized {
-              while ($haz.get != 3) wait()
-              notify()
+            $haz.synchronized {
+              while ($haz.get != 3) $haz.wait()
+              $haz.notify()
             }
             $memo
           case 2 =>
-            synchronized {
-              while ($haz.get != 3) wait()
-              notify()
+            $haz.synchronized {
+              while ($haz.get != 3) $haz.wait()
+              $haz.notify()
             }
             $memo
           case 3 => $memo
