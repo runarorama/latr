@@ -21,8 +21,8 @@ object lazifyMacro {
 
         $mods def $tname: $tpt = {
           if (!$haz) {
-            $haz = true
             $memo = $expr
+            $haz = true
           }
           $memo
         }
