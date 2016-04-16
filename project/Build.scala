@@ -3,16 +3,33 @@ import Keys._
 import bintray.BintrayPlugin.bintraySettings
 
 object BuildSettings {
+  lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    ),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
+        case Some((2, scalaMajor)) if scalaMajor >= 11 => Seq()
+        // in Scala 2.10, quasiquotes are provided by macro paradise
+        case Some((2, 10)) =>
+          Seq("org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
+      }
+    }
+  )
+
   val buildSettings = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.10.2", "2.10.3", "2.10.4", "2.10.5", "2.10.6", "2.11.0", "2.11.1", "2.11.2", "2.11.3", "2.11.4", "2.11.5", "2.11.6", "2.11.7", "2.11.8"),
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-M4"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
     scalacOptions ++= Seq("-deprecation"),
     licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
-    publishMavenStyle := true,
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-  )
+    publishMavenStyle := true
+  ) ++ scalaMacroDependencies
 }
 
 object MyBuild extends Build {
@@ -31,20 +48,7 @@ object MyBuild extends Build {
     settings = (buildSettings ++ Seq(
       organization := "com.higher-order",
       name := "latr",
-      version := "0.2.1",
-      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
-      libraryDependencies := {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          // if Scala 2.11+ is used, quasiquotes are available in the standard distribution
-          case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-            libraryDependencies.value
-          // in Scala 2.10, quasiquotes are provided by macro paradise
-          case Some((2, 10)) =>
-            libraryDependencies.value ++ Seq(
-              compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-              "org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
-        }
-      }
+      version := "0.2.2"
     ))
   ).settings(bintraySettings: _*)
 

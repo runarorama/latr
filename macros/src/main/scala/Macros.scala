@@ -4,13 +4,15 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.annotation.StaticAnnotation
 import scala.annotation.compileTimeOnly
+import macrocompat.bundle
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-object lazifyMacro {
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
-    import Flag._
+@bundle
+class latrMacro(val c: Context) {
+  import c.universe._
+  import Flag._
 
+  def lazifyImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
       val haz = TermName(c.freshName(s"${tn}_haz$$"))
@@ -30,27 +32,17 @@ object lazifyMacro {
     }
 
     val result = {
-      annottees.map(_.tree).toList match {
+      annottees.toList match {
         case q"$mods val $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case q"$mods def $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case _ => c.abort(c.enclosingPosition,
           "lazify macro must annotate a val or def, with explicit type annotation. For example `@lazify val x: Int = 0`")
       }
     }
-    c.Expr[Any](result)
+    result
   }
-}
 
-class lazify extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro lazifyMacro.impl
-}
-
-@compileTimeOnly("enable macro paradise to expand macro annotations")
-object lazifyPessimisticMacro {
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
-    import Flag._
-
+  def pessimisticImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
       val haz = TermName(c.freshName(s"${tn}_haz$$"))
@@ -86,27 +78,17 @@ object lazifyPessimisticMacro {
     }
 
     val result = {
-      annottees.map(_.tree).toList match {
+      annottees.toList match {
         case q"$mods val $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case q"$mods def $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case _ => c.abort(c.enclosingPosition,
           "lazifyPessimistic macro must annotate a val or def, with explicit type annotation. For example `@lazifyOptimistic val x: Int = 0`")
       }
     }
-    c.Expr[Any](result)
+    result
   }
-}
 
-class lazifyPessimistic extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro lazifyPessimisticMacro.impl
-}
-
-@compileTimeOnly("enable macro paradise to expand macro annotations")
-object lazifyOptimisticMacro {
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
-    import Flag._
-
+  def optimisticImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
       val haz = TermName(c.freshName(s"${tn}_haz$$"))
@@ -144,17 +126,25 @@ object lazifyOptimisticMacro {
     }
 
     val result = {
-      annottees.map(_.tree).toList match {
+      annottees.toList match {
         case q"$mods val $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case q"$mods def $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case _ => c.abort(c.enclosingPosition,
           "lazifyOptimistic macro must annotate a val or def, with explicit type annotation. For example `@lazifyOptimistic val x: Int = 0`")
       }
     }
-    c.Expr[Any](result)
+    result
   }
 }
 
+class lazify extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro latrMacro.lazifyImpl
+}
+
+class lazifyPessimistic extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro latrMacro.pessimisticImpl
+}
+
 class lazifyOptimistic extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro lazifyOptimisticMacro.impl
+  def macroTransform(annottees: Any*): Any = macro latrMacro.optimisticImpl
 }
