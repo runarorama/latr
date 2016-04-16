@@ -1,4 +1,4 @@
-# Lazified
+# Latr
 
 A scala macro for reasonable lazy semantics.
 
@@ -16,12 +16,12 @@ The implementations of `lazifyOptimistic` and `lazifyPessimistic` are taken from
 
 This library requires the [macro paradise compiler plugin](http://docs.scala-lang.org/overviews/macros/paradise.html). Follow the instructions there to set up the plugin.
 
-If you're using SBT, you can get Lazified from Bintray: 
+If you're using SBT, you can get Latr from Bintray: 
 
 ``` scala
 resolvers += Resolver.bintrayRepo("runarorama", "maven")
 
-libraryDependencies += "com.higher-order" %% "lazified" % "0.2.0"
+libraryDependencies += "com.higher-order" %% "latr" % "0.2.1"
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ lazy val x: Int = {
 You can instead say:
 
 ``` scala
-import lazified._
+import latr._
 
 @lazify val x: Int = {
   println("I may print multiple times under thread contention, but I'm super cheap!")
