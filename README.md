@@ -21,7 +21,7 @@ If you're using SBT, you can get Lazified from Bintray:
 ``` scala
 resolvers += Resolver.bintrayRepo("runarorama", "maven")
 
-libraryDependencies += "com.higher-order" %% "lazified" % "0.1.1"
+libraryDependencies += "com.higher-order" %% "lazified" % "0.2.0"
 ```
 
 ## Usage
