@@ -16,7 +16,11 @@ The implementations of `lazifyOptimistic` and `lazifyPessimistic` are taken from
 
 At the moment, only Scala 2.11 is supported.
 
-This library requires the [macro paradise compiler plugin](http://docs.scala-lang.org/overviews/macros/paradise.html). Follow the instructions there to set up the plugin.
+Latr requires the [macro paradise compiler plugin](http://docs.scala-lang.org/overviews/macros/paradise.html). Follow the instructions there to set up the plugin. If you're using SBT, you should just need a line like this in your `build.sbt`:
+
+``` scala
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+```
 
 If you're using SBT 0.13.6 or better, you can get Latr from Bintray thusly: 
 
