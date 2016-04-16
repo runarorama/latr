@@ -41,7 +41,7 @@ You can instead say:
 import lazified._
 
 @lazify val x: Int = {
-  println("I will only print once, unless I'm used by another thread at the same time!")
+  println("I may print multiple times under thread contention, but I'm super cheap!")
   10
 }
 ```
