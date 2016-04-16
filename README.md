@@ -62,7 +62,7 @@ Or:
 
 ``` scala
 @lazifyOptimistic val x: Int = {
-  println("I will only print once, using fancy atomic constructs!")
+  println("I will only print once, using fancy atomic stuff!")
   10
 }
 ```
