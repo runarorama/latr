@@ -1,4 +1,4 @@
-package lazified
+package latr
 
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context

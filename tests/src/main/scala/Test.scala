@@ -1,5 +1,5 @@
 object Test {
-  import lazified._
+  import latr._
 
   @lazify val x: Int = { println("Heya!"); 10 }
 

@@ -30,7 +30,7 @@ object MyBuild extends Build {
     file("macros"),
     settings = (buildSettings ++ Seq(
       organization := "com.higher-order",
-      name := "lazified",
+      name := "latr",
       version := "0.2.1",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies := {
