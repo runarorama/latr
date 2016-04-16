@@ -31,7 +31,7 @@ object MyBuild extends Build {
     settings = (buildSettings ++ Seq(
       organization := "com.higher-order",
       name := "lazified",
-      version := "0.2.0",
+      version := "0.2.1",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies := {
         CrossVersion.partialVersion(scalaVersion.value) match {
