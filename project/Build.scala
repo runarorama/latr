@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import bintray.BintrayPlugin.bintraySettings
 
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
@@ -7,7 +8,9 @@ object BuildSettings {
     crossScalaVersions := Seq("2.10.2", "2.10.3", "2.10.4", "2.10.5", "2.10.6", "2.11.0", "2.11.1", "2.11.2", "2.11.3", "2.11.4", "2.11.5", "2.11.6", "2.11.7", "2.11.8"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
-    scalacOptions ++= Seq(),
+    scalacOptions ++= Seq("-deprecation"),
+    licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+    publishMavenStyle := true,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   )
 }
@@ -19,16 +22,16 @@ object MyBuild extends Build {
     "root",
     file("."),
     settings = buildSettings ++ Seq(
-      run <<= run in Compile in core)
-  ) aggregate(macros, core)
+      run <<= run in Compile in tests)
+  ) aggregate(macros, tests)
 
   lazy val macros: Project = Project(
     "macros",
     file("macros"),
-    settings = buildSettings ++ Seq(
+    settings = (buildSettings ++ Seq(
       organization := "com.higher-order",
       name := "lazified",
-      version := "0.1",
+      version := "0.1.1",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies := {
         CrossVersion.partialVersion(scalaVersion.value) match {
@@ -42,12 +45,12 @@ object MyBuild extends Build {
               "org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
         }
       }
-    )
-  )
+    ))
+  ).settings(bintraySettings: _*)
 
-  lazy val core: Project = Project(
-    "core",
-    file("core"),
+  lazy val tests: Project = Project(
+    "tests",
+    file("tests"),
     settings = buildSettings
   ) dependsOn(macros)
 }

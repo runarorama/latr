@@ -1,5 +1,7 @@
+package lazified
+
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.blackbox.Context
 import scala.annotation.StaticAnnotation
 import scala.annotation.compileTimeOnly
 
@@ -11,8 +13,8 @@ object lazifyMacro {
 
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(s"$tn$$haz$$")
-      val memo = TermName(s"$tn$$memo$$")
+      val haz = TermName(c.freshName(s"${tn}_haz$$"))
+      val memo = TermName(s"${tn}_memo$$")
       q"""
         var $haz: Boolean = _
         var $memo: $tpt = _
@@ -40,7 +42,7 @@ object lazifyMacro {
 }
 
 class lazify extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro lazifyMacro.impl
+  def macroTransform(annottees: Any*): Any = macro lazifyMacro.impl
 }
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
@@ -51,9 +53,9 @@ object lazifyPessimisticMacro {
 
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(c.fresh(s"${tn}_haz$$"))
-      val memo = TermName(c.fresh(s"${tn}_memo$$"))
-      val lazyCompute = TermName(c.fresh(s"${tn}_lazyCompute$$"))
+      val haz = TermName(c.freshName(s"${tn}_haz$$"))
+      val memo = TermName(c.freshName(s"${tn}_memo$$"))
+      val lazyCompute = TermName(c.freshName(s"${tn}_lazyCompute$$"))
 
       q"""
         @volatile var $haz: Int = 0
@@ -94,7 +96,7 @@ object lazifyPessimisticMacro {
 }
 
 class lazifyPessimistic extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro lazifyPessimisticMacro.impl
+  def macroTransform(annottees: Any*): Any = macro lazifyPessimisticMacro.impl
 }
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
@@ -105,8 +107,8 @@ object lazifyOptimisticMacro {
 
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(c.fresh(s"${tn}_haz$$"))
-      val memo = TermName(c.fresh(s"${tn}_memo$$"))
+      val haz = TermName(c.freshName(s"${tn}_haz$$"))
+      val memo = TermName(c.freshName(s"${tn}_memo$$"))
 
       q"""
         import annotation.{tailrec, switch}
@@ -152,5 +154,5 @@ object lazifyOptimisticMacro {
 }
 
 class lazifyOptimistic extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro lazifyOptimisticMacro.impl
+  def macroTransform(annottees: Any*): Any = macro lazifyOptimisticMacro.impl
 }
