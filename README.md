@@ -4,24 +4,32 @@ A scala macro for reasonable lazy semantics.
 
 This library provides three annotation macros:
 
-`@lazify`: Rewrites a `def` or `val` so that the right-hand-side is memoized. Does not synchronize or attempt to share the memo between threads.
+`@lazify`: Rewrites a `def` or `val` so that its evaluation is delayed and memoized. Does not synchronize or attempt to share the memo between threads. If two threads call the unevaluated expression at the same time, the evaluation will happen twice.
 
-`@lazifyPessimistic`: Rewrites a `def` or `val` to something semantically equivalent to a `lazy val`, synchronizing on the parent object to share the memo among multiple threads. Performs best if the expected contention is low.
+`@lazifyPessimistic`: Rewrites a `def` or `val` to something similar to a `lazy val`, except synchronizing on a fresh monitor rather than the parent object. This prevents locking the whole object while the expression is evaluated. Performs best if the expected thread contention is low.
 
-`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic reference that uses _compare-and-set_ to share the memo among multiple threads. Performs better than the pessimistic version when contention is high, at the cost of doing more work than necessary when contention is low.
+`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic reference that uses _compare-and-swap_ to share the memo among multiple threads. Performs better than the pessimistic version when contention is high, but worse when contention is low.
 
-The implementations of `lazifyOptimistic` and `lazifyPessimistic` are taken from [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html). The "pessimistic" version is SIP-20 *Version V2*, which uses two `synchronized` blocks using a fresh `Object` as a monitor rather than the `this` object. The "optimistic" version is taken from SIP-20 *Version V4*, and initializes a fresh `AtomicReference` and uses `compareAndSet` with replay to avoid some locking.
+The implementations of `lazifyOptimistic` and `lazifyPessimistic` are taken from [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html). The "pessimistic" version is based on SIP-20 *Version V2*. The "optimistic" version is taken from SIP-20 *Version V4*, and initializes a fresh `AtomicReference` and uses `compareAndSet` with replay to avoid some locking.
 
 ## Setup
 
+At the moment, only Scala 2.11 is supported.
+
 This library requires the [macro paradise compiler plugin](http://docs.scala-lang.org/overviews/macros/paradise.html). Follow the instructions there to set up the plugin.
 
-If you're using SBT, you can get Latr from Bintray: 
+If you're using SBT 0.13.6 or better, you can get Latr from Bintray thusly: 
 
 ``` scala
 resolvers += Resolver.bintrayRepo("runarorama", "maven")
 
 libraryDependencies += "com.higher-order" %% "latr" % "0.2.1"
+```
+
+With older versions of SBT you'll need this instead:
+
+``` scala
+resolvers += Resolver.url("runarorama bintray", url("http://dl.bintray.com/runarorama/maven"))
 ```
 
 ## Usage
