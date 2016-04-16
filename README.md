@@ -8,7 +8,7 @@ This library provides three annotation macros:
 
 `@lazifyPessimistic`: Rewrites a `def` or `val` to something semantically equivalent to a `lazy val`, synchronizing on the parent object to share the memo among multiple threads. Performs best if the expected contention is low.
 
-`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic reference that uses _compare-and-set_ to share the memo among multiple threads. Performs better than the optimistic version when contention is high, at the cost of doing more work than necessary when contention is low.
+`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic reference that uses _compare-and-set_ to share the memo among multiple threads. Performs better than the pessimistic version when contention is high, at the cost of doing more work than necessary when contention is low.
 
 The implementations of `lazifyOptimistic` and `lazifyPessimistic` are taken from [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html). The "pessimistic" version is SIP-20 *Version V2*, which uses two `synchronized` blocks using a fresh `Object` as a monitor rather than the `this` object. The "optimistic" version is taken from SIP-20 *Version V4*, and initializes a fresh `AtomicReference` and uses `compareAndSet` with replay to avoid some locking.
 
