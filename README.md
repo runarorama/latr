@@ -62,7 +62,7 @@ Or:
 
 ``` scala
 @lazifyOptimistic val x: Int = {
-  println("I'm totally thread-safe, but kind of expensive!")
+  println("I will only print once, using fancy atomic constructs!")
   10
 }
 ```
@@ -71,7 +71,7 @@ Or:
 
 ``` scala
 @lazifyPessimistic val x: Int = {
-  println("I will block the world, but only slightly!")
+  println("I will only print once, using good old-fashioned synchronized blocks!")
   10
 }
 ```
