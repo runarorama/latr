@@ -1,4 +1,4 @@
-# lazifed
+# Lazified
 
 A scala macro for reasonable lazy semantics.
 
