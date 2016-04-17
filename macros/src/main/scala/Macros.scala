@@ -82,7 +82,7 @@ class latrMacro(val c: Context) {
         case q"$mods val $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case q"$mods def $tname: $tpt = $expr" :: Nil => go(mods, tname, tpt, expr)
         case _ => c.abort(c.enclosingPosition,
-          "lazifyPessimistic macro must annotate a val or def, with explicit type annotation. For example `@lazifyOptimistic val x: Int = 0`")
+          "lazifyPessimistic macro must annotate a val or def, with explicit type annotation. For example `@lazifyPessimistic val x: Int = 0`")
       }
     }
     result
