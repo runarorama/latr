@@ -15,8 +15,9 @@ class latrMacro(val c: Context) {
   def lazifyImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(c.freshName(s"${tn}_haz$$"))
-      val memo = TermName(s"${tn}_memo$$")
+      val haz = TermName(c.freshName(s"${tn}$$haz"))
+      val memo = TermName(s"${tn}$$memo")
+
       q"""
         var $haz: Boolean = _
         var $memo: $tpt = _
@@ -45,31 +46,29 @@ class latrMacro(val c: Context) {
   def pessimisticImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(c.freshName(s"${tn}_haz$$"))
-      val memo = TermName(c.freshName(s"${tn}_memo$$"))
-      val lazyCompute = TermName(c.freshName(s"${tn}_lazyCompute$$"))
-      val monitor = TermName(c.freshName(s"${tn}_monitor$$"))
+      val haz = TermName(c.freshName(s"${tn}$$haz"))
+      val memo = TermName(c.freshName(s"${tn}$$memo"))
+      val lazyCompute = TermName(c.freshName(s"${tn}$$latrCompute"))
 
       q"""
-        val $monitor = new Object {}
-        @volatile var $haz: Int = 0
+        @volatile var $haz: Byte = 0
         var $memo: $tpt = _
         private def $lazyCompute(): $tpt = {
-          $monitor.synchronized {
+          this.synchronized {
             if ($haz == 0) {
               $haz = 1
             } else {
               while ($haz == 1) {
-                $monitor.wait()
+                this.wait()
               }
               return $memo
             }
           }
           val result = $expr
-          $monitor.synchronized {
+          this.synchronized {
             $memo = result
             $haz = 3
-            $monitor.notifyAll()
+            this.notifyAll()
           }
           $memo
         }
@@ -91,8 +90,8 @@ class latrMacro(val c: Context) {
   def optimisticImpl(annottees: Tree*): Tree = {
     def go(mods: Modifiers, tname: TermName, tpt: Tree, expr: Tree) = {
       val TermName(tn) = tname
-      val haz = TermName(c.freshName(s"${tn}_haz$$"))
-      val memo = TermName(c.freshName(s"${tn}_memo$$"))
+      val haz = TermName(c.freshName(s"${tn}$$haz"))
+      val memo = TermName(c.freshName(s"${tn}$$memo"))
 
       q"""
         import annotation.{tailrec, switch}

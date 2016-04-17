@@ -16,19 +16,25 @@ object Test {
     @lazify val b:Int = A.a1
   }
 
-  @lazify val foo: Int = { println("once!"); Thread.sleep(1000); 10 }
+  @lazify val foo: Int = { println("once!"); 10 }
   @lazifyPessimistic val bar: Int = { println("once!"); Thread.sleep(1000); 10 }
   @lazifyOptimistic  val baz: Int = { println("once!"); Thread.sleep(1000); 10 }
 
-  @lazify val foos: Unit = Range(1, 100).foreach { _ =>
-    new Thread(new Runnable { def run = println(foo) }).start
+  def foos: Unit = Range(1, 100).foreach { _ =>
+    new Thread(new Runnable {
+      def run = {
+        Thread.sleep(1000)
+        println(foo)
+      }
+    }).start
   }
 
-  @lazify val bars: Unit = Range(1, 100).foreach { _ =>
+  def bars: Unit = Range(1, 100).foreach { _ =>
     new Thread(new Runnable { def run = println(bar) }).start
   }
 
-  @lazify val bazs: Unit = Range(1, 100).foreach { _ =>
+  def bazs: Unit = Range(1, 100).foreach { _ =>
     new Thread(new Runnable { def run = println(baz) }).start
   }
+
 }

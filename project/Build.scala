@@ -4,6 +4,7 @@ import bintray.BintrayPlugin.bintraySettings
 
 object BuildSettings {
   lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
+    version := "0.3.0",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
@@ -47,8 +48,7 @@ object MyBuild extends Build {
     file("macros"),
     settings = (buildSettings ++ Seq(
       organization := "com.higher-order",
-      name := "latr",
-      version := "0.2.2"
+      name := "latr"
     ))
   ).settings(bintraySettings: _*)
 
