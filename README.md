@@ -6,11 +6,9 @@ This library provides three annotation macros:
 
 `@lazify`: Rewrites a `def` or `val` so that its evaluation is delayed and memoized. Does not synchronize or attempt to share the memo between threads. If two threads call the unevaluated expression at the same time, the evaluation will happen twice.
 
-`@lazifyPessimistic`: Rewrites a `def` or `val` to something similar to a `lazy val`, except synchronizing on a fresh monitor rather than the parent object. This prevents locking the whole object while the expression is evaluated. Performs best if the expected thread contention is low.
+`@lazifyPessimistic`: Rewrites a `def` or `val` to something similar to a `lazy val`, except instead of locking the whole object while evaluating, it locks only while checking if evaluation has already happened. Essentially implements [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html) Version V2. Performs best if the expected thread contention is low.
 
-`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic memory cell that uses _compare-and-swap_ to share the memo among multiple threads. Performs better than the pessimistic version when contention is high, but worse when contention is low.
-
-The implementations of `lazifyOptimistic` and `lazifyPessimistic` are simple state machines taken from [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html). The "pessimistic" version is based on SIP-20 *Version V2*. The "optimistic" version is taken from SIP-20 *Version V4*, using an `AtomicInteger` and  `compareAndSet` with replay to avoid some locking.
+`@lazifyOptimistic`: Rewrites a `def` or `val` to an atomic memory cell that uses _compare-and-swap_ to share the memo among multiple threads. Performs better than the pessimistic version when contention is high, but worse when contention is low. Essentially implements [SIP-20](http://docs.scala-lang.org/sips/pending/improved-lazy-val-initialization.html) Version V4.
 
 ## Setup
 
