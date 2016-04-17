@@ -23,7 +23,7 @@ If you're using SBT 0.13.6 or better, you can get Latr from Bintray thusly:
 ``` scala
 resolvers += Resolver.bintrayRepo("runarorama", "maven")
 
-libraryDependencies += "com.higher-order" %% "latr" % "0.2.2"
+libraryDependencies += "com.higher-order" %% "latr" % "0.3.0"
 ```
 
 With older versions of SBT you'll need this instead:
