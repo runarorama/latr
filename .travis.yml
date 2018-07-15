@@ -1,0 +1,11 @@
+language: scala
+jdk: oraclejdk8
+sudo: false
+script:
+- sbt "+ test" "+ run"
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/launchers"
+before_cache:
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
