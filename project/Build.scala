@@ -8,9 +8,23 @@ object BuildSettings {
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
     ),
+    scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
+      case Some((2, n)) if n >= 13 =>
+        Seq(
+          "-Ymacro-annotations"
+        )
+    }.toList.flatten,
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        // if scala 2.13.0-M4+ is used, paradise are merged into scala-reflect
+        case Some((2, scalaMajor)) if scalaMajor >= 13 =>
+          Seq()
+        case _ =>
+          Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
+      }
+    },
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
@@ -22,9 +36,9 @@ object BuildSettings {
     }
   )
 
-  val buildSettings = Defaults.defaultSettings ++ Seq(
-    scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-M4"),
+  val buildSettings = Seq(
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M4"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
     scalacOptions ++= Seq("-deprecation"),
@@ -38,23 +52,26 @@ object MyBuild extends Build {
 
   lazy val root: Project = Project(
     "root",
-    file("."),
-    settings = buildSettings ++ Seq(
-      run <<= run in Compile in tests)
-  ) aggregate(macros, tests)
+    file(".")
+  ).settings(
+    buildSettings,
+    run := (run in Compile in tests).evaluated
+  ).aggregate(macros, tests)
 
   lazy val macros: Project = Project(
     "macros",
-    file("macros"),
-    settings = (buildSettings ++ Seq(
-      organization := "com.higher-order",
-      name := "latr"
-    ))
-  ).settings(bintraySettings: _*)
+    file("macros")
+  ).settings(
+    buildSettings,
+    organization := "com.higher-order",
+    name := "latr",
+    bintraySettings
+  )
 
   lazy val tests: Project = Project(
     "tests",
-    file("tests"),
-    settings = buildSettings
-  ) dependsOn(macros)
+    file("tests")
+  ).settings(
+    buildSettings
+  ).dependsOn(macros)
 }
