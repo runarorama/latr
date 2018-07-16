@@ -1,4 +1,4 @@
-object Test {
+object Test extends App {
   import latr._
 
   @lazify val x: Int = { println("Heya!"); 10 }
