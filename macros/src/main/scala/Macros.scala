@@ -4,10 +4,8 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.annotation.StaticAnnotation
 import scala.annotation.compileTimeOnly
-import macrocompat.bundle
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-@bundle
 class latrMacro(val c: Context) {
   import c.universe._
   import Flag._
