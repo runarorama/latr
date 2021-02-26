@@ -22,7 +22,7 @@ lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
 )
 
 lazy val notPublish = Seq(
-  skip in publish := true,
+  publish / skip := true,
   publishArtifact := false,
   publish := {},
   publishLocal := {}
@@ -44,7 +44,7 @@ lazy val root: Project = Project(
 ).settings(
   buildSettings,
   notPublish,
-  run := (run in Compile in tests).evaluated
+  run := (tests / Compile / run).evaluated
 ).aggregate(macros, tests)
 
 lazy val macros: Project = Project(
