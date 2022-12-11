@@ -16,8 +16,9 @@ jobs:
           - java: 11
     steps:
     - uses: actions/checkout@v3
-    - uses: olafurpg/setup-scala@v13
+    - uses: actions/setup-java@c3ac5dd0ed8db40fedb61c32fbe677e6b355e94c # v3.8.0
       with:
-        java-version: "adopt@1.${{ matrix.java }}"
+        java-version: ${{matrix.java}}
+        distribution: adopt
     - uses: coursier/cache-action@v6.4
     - run: sbt -v "+ test" "+ tests/run"
