@@ -30,7 +30,7 @@ lazy val notPublish = Seq(
 
 val buildSettings = Seq(
   scalaVersion := "2.11.12",
-  crossScalaVersions := Seq("2.11.12", "2.12.18", "2.13.12"),
+  crossScalaVersions := Seq("2.11.12", "2.12.18", "2.13.13"),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   scalacOptions ++= Seq("-deprecation"),
