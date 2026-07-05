@@ -32,6 +32,14 @@ val buildSettings = Seq(
   scalaVersion := "2.11.12",
   crossScalaVersions := Seq("2.11.12", "2.12.21", "2.13.18"),
   scalacOptions ++= Seq("-deprecation"),
+  scalacOptions ++= {
+    scalaBinaryVersion.value match {
+      case "2.12" | "2.13" =>
+        Seq("-release:8")
+      case _ =>
+        Nil
+    }
+  },
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   publishMavenStyle := true
 ) ++ scalaMacroDependencies
