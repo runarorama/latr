@@ -1,4 +1,4 @@
-lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
+lazy val scalaMacroDependencies: Seq[Setting[?]] = Seq(
   version := "0.3.0",
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
@@ -16,7 +16,7 @@ lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
       case Some((2, scalaMajor)) if scalaMajor >= 13 =>
         Seq()
       case _ =>
-        Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full))
+        Seq(compilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full)))
     }
   },
 )
