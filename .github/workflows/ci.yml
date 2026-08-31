@@ -19,7 +19,7 @@ jobs:
     - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
       with:
         java-version: ${{matrix.java}}
-        distribution: adopt
+        distribution: temurin
     - uses: coursier/cache-action@v8.1
     - uses: sbt/setup-sbt@v1
     - run: sbt
